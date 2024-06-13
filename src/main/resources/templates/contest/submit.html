@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Download & Upload</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="../../../js/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="../../../js/bootstrap.min.js"></script>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .column {
+            width: 45%;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            min-height: 70vh;
+        }
+    </style>
+</head>
+<div class="container">
+    <div class="column">
+        <h2>题目:</h2>
+        <a href= "download?name=${(file)!} " target="_blank"> 题面 </a>
+        <h2>sample:</h2>
+        <a href= "sample?name=${(sample)!}" target="_blank"> samp </a>
+    </div>
+    <div class="column">
+        <form method="post" enctype="multipart/form-data" action="upload">
+            <h2>提交答案（zip压缩文件）</h2>
+            <input type="hidden" name="upath" value= ${(path)!} >
+
+            <input type="file" name="ufile" accept="*/*"> <br>
+            <button type="submit">提交</button>
+        </form>
+        <br><br>
+
+    </div>
+
+</div>
+
+<body>
+
+
+</body>
+
+
+
+<!--姓名（考号）：<input type="text" name="uname"> <br>-->
