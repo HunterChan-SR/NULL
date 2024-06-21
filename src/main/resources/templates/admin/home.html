@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AdminHome</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="../../../js/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="../../../js/bootstrap.min.js"></script>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .column {
+            width: 45%;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            min-height: 70vh;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="column">
+        <h1>其他管理</h1>
+        <br><br><br>
+        <h2><a href="#">设置比赛时间(功能建设中)</a></h2>
+        <h2><a href="#">公告管理</a></h2>
+        <h2><a href="#">校区简介管理</a></h2>
+        <h2><a href="#">导入CSV</a></h2>
+        <h2><a href="#">手动修改成绩</a></h2>
+        <h2><a href="#">导出成绩</a></h2>
+        <h2><a href="#">导出奖学金名单</a></h2>
+        <h2><a href="#">导入Result</a></h2>
+        <h2><a href="#">导出得分细节</a></h2>
+        <h2><a href="#">修改管理员密码</a></h2>
+    </div>
+    <div class="column">
+
+        <h1>
+            比赛管理
+        </h1>
+        <br><br><br>
+
+        <form method="post" enctype="multipart/form-data" action="/admin/add">
+            <input type="text" name="addname" placeholder="比赛名称">
+            <button type="submit" class="btn btn-default">添加比赛</button>
+        </form>
+
+        <br>
+
+
+        <h2>比赛列表:</h2>
+        <table class="table table-condensed table-striped">
+            <#list retList as bean>
+            <tr>
+
+
+                <td>
+                    <h3>
+                        ${(bean.name)!}
+                    </h3>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="btn btn-primary" href="/contest/submit?name=${(bean.name)!}">进入比赛</a>
+
+                    <a class="btn btn-danger" href="/admin/delete?name=${(bean.name)!}">删除比赛</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <form method="post" enctype="multipart/form-data" action="uploadpdf">
+                        <input type="hidden" name="name" value=${(bean.name)!}>
+                        <input type="file" id="pdfInput" name="pdffile" accept=".pdf">
+                        <!-- 添加清除文件按钮 -->
+
+                        <button type="submit" class="btn btn-info">上传题面</button>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <form method="post" enctype="multipart/form-data" action="uploadzip">
+                        <input type="hidden" name="name" value=${(bean.name)!}>
+                        <input type="file" id="zipInput" name="zipfile" accept=".zip">
+                        <!-- 添加清除文件按钮 -->
+
+                        <button type="submit" class="btn btn-info">上传simple.zip</button>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+
+                <td>
+                    <a class="btn btn-warning"
+                       href="/admin/package?name=${(bean.name)!}">一键打包学生代码（请勿重复点击！）</a>
+                </td>
+            </tr>
+        </#list>
+        </table>
+
+
+    </div>
+
+</div>
+
+</body>
+</html>

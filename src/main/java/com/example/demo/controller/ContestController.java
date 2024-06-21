@@ -56,6 +56,11 @@ public class ContestController extends BaseController {
 
     @RequestMapping("/download")
     public String download(String name, HttpServletRequest req, HttpServletResponse rep) throws IOException {
+        File file = new File(name);
+        if (!file.exists()) {
+            rep.sendError(404, "文件不存在，请及时练习监考老师！\n 祝您比赛顺利");
+            return null;
+        }
         FileInputStream input = new FileInputStream(name);
         ServletOutputStream output = rep.getOutputStream();
         IOUtils.copy(input, output);
@@ -66,6 +71,12 @@ public class ContestController extends BaseController {
 
     @RequestMapping("/sample")
     public String sample(String name, HttpServletRequest req, HttpServletResponse rep) throws IOException {
+
+        File file = new File(name);
+        if (!file.exists()) {
+            rep.sendError(404, "文件不存在，请及时练习监考老师！\n 祝您比赛顺利");
+            return null;
+        }
 //        System.out.println(name);
         FileInputStream input = new FileInputStream(name);
         ServletOutputStream output = rep.getOutputStream();
@@ -84,9 +95,12 @@ public class ContestController extends BaseController {
         req.setCharacterEncoding("UTF-8");
         String upath = req.getParameter("upath"); // 假设 upath 是一个合法的目录路径
         Part part = req.getPart("ufile");
+        if (part == null || part.getSubmittedFileName() == null || part.getSubmittedFileName().isEmpty()) {
+            return jsAlert("未选择文件，提交失败", rep);
+        }
 
         String fileName = part.getSubmittedFileName(); // 获取原始文件名
-        File directory = new File(upath); // 创建File对象表示目录
+        File directory = new File(upath + "/subCode"); // 创建File对象表示目录
 
         // 确保目录存在，不存在则创建
         if (!directory.exists()) {

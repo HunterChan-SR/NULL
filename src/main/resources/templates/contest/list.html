@@ -14,7 +14,7 @@
 
 <body>
 <ul class="breadcrumb" style="margin:0;">
-    <li><a href="#">Contest</a></li>
+    <li><a href="#">比赛列表：</a></li>
 </ul>
 <form action="contest/list"  class="form-inline">
     <div class="row alert alert-info" style="margin:0;padding:3px;">
@@ -22,21 +22,19 @@
         <a class="btn btn-success" href="/contest/list">刷新</a>
     </div>
 
-    <table class="table table-condensed table-striped">
-        <tr>
-            <th>比赛：</th>
-        </tr>
-        <#list retList as bean>
-        <tr>
 
-            <td> ${(bean.name)!} </td>
-            <th>
-                <a class ="btn btn-danger" href="/contest/submit?name=${(bean.name)!}">进入比赛</a>
-            </th>
+        <table class="table ">
+            <tbody>
+            <#list retList as bean>
+            <tr class="text-center center">
+                <td >
+                    <a type="button" class="btn btn-default btn-lg btn-block"  href="/contest/submit?name=${(bean.name)!}"> ${(bean.name)!} </a>
+                </td>
+            </tr>
+            </#list>
+            </tbody>
+        </table>
 
-        </tr>
-        </#list>
-    </table>
 
 </form>
 </body>

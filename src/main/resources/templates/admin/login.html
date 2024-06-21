@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <!-- 添加内联样式以实现布局居中 -->
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0; /* 可选的背景颜色 */
+        }
+
+        .login-container {
+            text-align: center;
+        }
+
+        input[type="password"] {
+            width: 250px; /* 您可以根据需要调整宽度 */
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            width: 260px; /* 略大于输入框，以保持视觉效果一致 */
+            padding: 10px;
+            background-color: #007BFF; /* 蓝色背景示例 */
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* 鼠标悬停时的颜色变化 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <form method="post" enctype="multipart/form-data" action="subpwd">
+        <input type="password" name="pwd" placeholder="Enter admin password">
+        <button type="submit">Login</button>
+    </form>
+
+</div>
+
+</body>
+</html>

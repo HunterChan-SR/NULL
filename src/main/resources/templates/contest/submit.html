@@ -25,20 +25,25 @@
         }
     </style>
 </head>
+
+<body>
 <div class="container">
     <div class="column">
         <h2>题目:</h2>
-        <a href= "download?name=${(file)!} " target="_blank"> 题面 </a>
+        <a href="download?name=${(file)!} " target="_blank"> 题面 </a>
         <h2>sample:</h2>
-        <a href= "sample?name=${(sample)!}" target="_blank"> samp </a>
+        <a href="sample?name=${(sample)!}" target="_blank"> sample.zip </a>
     </div>
     <div class="column">
         <form method="post" enctype="multipart/form-data" action="upload">
             <h2>提交答案（zip压缩文件）</h2>
-            <input type="hidden" name="upath" value= ${(path)!} >
+            <input type="hidden" name="upath" value=${(path)!}>
 
-            <input type="file" name="ufile" accept="*/*"> <br>
-            <button type="submit">提交</button>
+            <input class="btn-info" type="file" id="fileInput" name="ufile" accept=".zip">
+            <!-- 添加清除文件按钮 -->
+            <a id="clearFileButton">清除文件</a>
+            <br><br>
+            <button class="btn btn-large btn-warning" type="submit">提交</button>
         </form>
         <br><br>
 
@@ -46,11 +51,21 @@
 
 </div>
 
-<body>
+<script>    // 当文档加载完成后执行
+document.addEventListener('DOMContentLoaded', function () {
+    // 获取清除文件按钮和文件输入框的引用
+    var clearFileButton = document.getElementById('clearFileButton');
+    var fileInput = document.getElementById('fileInput');
 
+    // 为清除文件按钮添加点击事件监听器
+    clearFileButton.addEventListener('click', function () {
+        // 重置文件输入框的值，从而清除已选择的文件
+        fileInput.value = '';
+    });
+});
+</script>
 
 </body>
-
-
+</html>
 
 <!--姓名（考号）：<input type="text" name="uname"> <br>-->
