@@ -10,10 +10,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
@@ -224,7 +228,7 @@ public class AdminController extends BaseController {
             String name = req.getParameter("name");
             File file = new File("FILES/" + name + "/subCode");
             if (!file.exists()) {
-                return jsAlert("打包失败", "/admin/home", rep);
+                return jsAlert("打包失败,请保证至少存在一份学生提交代码", "/admin/home", rep);
             } else {
                 Utils.unzipAllZipsInDirectory(new File("FILES/" + name + "/" + "subCode"));
 //                Utils.DeleteAllZipsInDirectory("FILES/" + name + "/" + "subCode");
@@ -236,7 +240,7 @@ public class AdminController extends BaseController {
                     ZipOutputStream zos = new ZipOutputStream(fos);
 //
 //                    // 调用递归方法将文件夹内容添加到 ZIP 输出流
-                    Utils.zipFolder(file, zos);
+                    Utils.zipFolder(file, name, zos);
 //
 //                    // 关闭流
                     zos.close();
@@ -261,22 +265,31 @@ public class AdminController extends BaseController {
 
     @RequestMapping("/download")
     public String download(String name, HttpServletRequest req, HttpServletResponse rep) {
-        FileInputStream input = null;
-        try {
-            input = new FileInputStream("FILES/" + name + "/subCode_" + name + ".zip");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        if (!AssertPWD(req)) {
+            return jsAlert("请输入正确的管理员密码", "/admin/login", rep);
+        } else {
+            try (FileInputStream input = new FileInputStream("FILES/" + name + "/subCode_" + name + ".zip");
+                 ServletOutputStream output = rep.getOutputStream()) {
+
+                // 设置响应头以指定下载文件的名称
+                String contentDisposition = "attachment;filename=" + URLEncoder.encode(name + ".zip", StandardCharsets.UTF_8);
+                rep.setHeader(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
+
+                // 设置响应类型为application/octet-stream，指示这是一个二进制文件
+                rep.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+                // 复制文件流到输出流
+                IOUtils.copy(input, output);
+
+            } catch (FileNotFoundException e) {
+                // 更好的错误处理，比如记录日志，返回错误信息给前端
+                throw new RuntimeException("File not found", e);
+            } catch (IOException e) {
+                // 同样，记录日志，适当处理
+                throw new RuntimeException("Error during file download", e);
+            }
+            return null;
         }
-        ServletOutputStream output = null;
-        try {
-            output = rep.getOutputStream();
-            IOUtils.copy(input, output);
-            input.close();
-            output.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
     }
 
 

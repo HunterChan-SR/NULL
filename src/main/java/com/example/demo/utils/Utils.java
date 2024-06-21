@@ -71,17 +71,17 @@ public class Utils {
     }
 
     // 添加此方法用于递归压缩文件夹
-    public static void zipFolder(File folder, ZipOutputStream zos) throws IOException {
+    public static void zipFolder(File folder, String pathInZip, ZipOutputStream zos) throws IOException {
         byte[] buffer = new byte[1024];
         File[] files = folder.listFiles();
         for (File file : files) {
             if (file.isDirectory()) {
                 // 如果是目录，则递归调用
-                zipFolder(file, zos);
+                zipFolder(file, pathInZip + "/" + file.getName(), zos);
             } else {
                 // 如果是文件，则压缩该文件
                 FileInputStream fis = new FileInputStream(file);
-                ZipEntry zipEntry = new ZipEntry(file.getAbsolutePath());
+                ZipEntry zipEntry = new ZipEntry(pathInZip + "/" + file.getName());
                 zos.putNextEntry(zipEntry);
                 int length;
                 while ((length = fis.read(buffer)) > 0) {
