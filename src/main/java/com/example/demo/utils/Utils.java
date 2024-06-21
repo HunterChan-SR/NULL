@@ -2,10 +2,11 @@ package com.example.demo.utils;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.print.attribute.standard.Compression;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +15,10 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import static io.netty.handler.ssl.OpenSslCertificateCompressionConfig.AlgorithmMode.Compress;
 
 public class Utils {
     final static int MOD = 998244353;
@@ -90,8 +94,7 @@ public class Utils {
     }
 
 
-    public static void unzipAllZipsInDirectory(String directoryPath) {
-        File directory = new File(directoryPath);
+    public static void unzipAllZipsInDirectory(File directory) {
         if (!directory.exists() || !directory.isDirectory()) {
             System.out.println("指定路径不存在或不是一个目录");
             return;
@@ -104,7 +107,7 @@ public class Utils {
         }
 
         for (File zipFile : zipFiles) {
-            unzip(zipFile.getAbsolutePath());
+            unzip(zipFile, directory);
         }
     }
 
@@ -149,28 +152,41 @@ public class Utils {
     }
 
     /**
-     * 解压单个ZIP文件到指定目录下的子文件夹
+     * 解压单个ZIP文件
      *
-     * @param zipFilePath ZIP文件的绝对路径
+     * @param zipFile   ZIP文件
+     * @param outputDir 解压后的文件保存的目录
      */
-    public static void unzip(String zipFilePath) {
-        try (ZipFile zip = new ZipFile(zipFilePath)) {
-            Path destDir = Paths.get(zip.getName().substring(0, zip.getName().lastIndexOf('/')));
-//            Files.createDirectories(destDir); // 创建目标目录
-
-            Enumeration<? extends ZipEntry> entries = zip.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                Path filePath = destDir.resolve(entry.getName());
+    public static void unzip(File zipFile, File outputDir) {
+        if (!outputDir.isDirectory()) {
+            System.out.println(outputDir + "不是一个文件夹");
+            return;
+        }
+        try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                File file = new File(outputDir, entry.getName());
                 if (entry.isDirectory()) {
-                    Files.createDirectories(filePath);
+                    if (!file.exists()) {
+                        file.mkdirs();
+                    }
                 } else {
-                    Files.copy(zip.getInputStream(entry), filePath);
+                    File parent = file.getParentFile();
+                    if (!parent.exists()) {
+                        parent.mkdirs();
+                    }
+                    try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            bos.write(buffer, 0, len);
+                        }
+                    }
                 }
+                zis.closeEntry();
             }
-            System.out.println(zip.getName() + " 解压完成");
         } catch (IOException e) {
-            System.err.println("解压 " + zipFilePath + " 时发生错误: " + e.getMessage());
+            System.out.println("解压文件时发生错误: " + e.getMessage());
         }
     }
 

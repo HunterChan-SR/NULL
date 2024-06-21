@@ -13,10 +13,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
@@ -78,6 +75,8 @@ public class AdminController extends BaseController {
             for (var s : subDirectories) {
                 Contest bean = new Contest();
                 bean.setName(s);
+                File packageFile = new File("FILES/" + s + "/subCode_" + s + ".zip");
+                bean.setPackaged(packageFile.exists());
                 retList.add(bean);
             }
             req.setAttribute("retList", retList);
@@ -93,7 +92,7 @@ public class AdminController extends BaseController {
             return jsAlert("请输入正确的管理员密码", "/admin/login", rep);
         } else {
             String addname = req.getParameter("addname");
-            if (addname == null || addname.length() == 0) {
+            if (addname == null || addname.isEmpty()) {
                 return jsAlert("请输入比赛名称", rep);
             } else {
                 File file = new File("FILES/" + addname);
@@ -114,7 +113,7 @@ public class AdminController extends BaseController {
             return jsAlert("请输入正确的管理员密码", "/admin/login", rep);
         } else {
             String name = req.getParameter("name");
-            if (name == null || name.length() == 0) {
+            if (name == null || name.isEmpty()) {
                 return jsAlert("删除失败", rep);
             } else {
                 File file = new File("FILES/" + name);
@@ -130,12 +129,12 @@ public class AdminController extends BaseController {
     }
 
     @RequestMapping("/uploadpdf")
-    public String uploadpdf(HttpServletRequest req, HttpServletResponse rep) throws ServletException, IOException {
+    public String uploadpdf(HttpServletRequest req, HttpServletResponse rep) {
         if (!AssertPWD(req)) {
             return jsAlert("请输入正确的管理员密码", "/admin/login", rep);
         } else {
             String name = req.getParameter("name");
-            if (name == null || name.length() == 0) {
+            if (name == null || name.isEmpty()) {
                 return jsAlert("上传失败", rep);
             } else {
                 File file = new File("FILES/" + name);
@@ -143,14 +142,30 @@ public class AdminController extends BaseController {
                     return jsAlert("上传失败", "/admin/home", rep);
                 } else {
                     File pdffile = new File("FILES/" + name + "/" + name + ".pdf");
-                    req.setCharacterEncoding("UTF-8");
-                    Part part = req.getPart("pdffile");
+                    try {
+                        req.setCharacterEncoding("UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                        return jsAlert("编码失败", rep);
+                    }
+                    Part part = null;
+                    try {
+                        part = req.getPart("pdffile");
+                    } catch (IOException | ServletException e) {
+                        e.printStackTrace();
+                        return jsAlert("上传失败", "/admin/home", rep);
+                    }
 
                     if (part == null || part.getSubmittedFileName() == null || part.getSubmittedFileName().isEmpty()) {
                         return jsAlert("上传失败", "/admin/home", rep);
                     }
 
-                    part.write(pdffile.getAbsolutePath());
+                    try {
+                        part.write(pdffile.getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return jsAlert("写入失败", rep);
+                    }
 
                     return jsAlert("上传成功:" + pdffile.getName(), "/admin/home", rep);
                 }
@@ -159,12 +174,12 @@ public class AdminController extends BaseController {
     }
 
     @RequestMapping("/uploadzip")
-    public String uploadzip(HttpServletRequest req, HttpServletResponse rep) throws ServletException, IOException {
+    public String uploadzip(HttpServletRequest req, HttpServletResponse rep) {
         if (!AssertPWD(req)) {
             return jsAlert("请输入正确的管理员密码", "/admin/login", rep);
         } else {
             String name = req.getParameter("name");
-            if (name == null || name.length() == 0) {
+            if (name == null || name.isEmpty()) {
                 return jsAlert("上传失败", rep);
             } else {
                 File file = new File("FILES/" + name);
@@ -172,13 +187,28 @@ public class AdminController extends BaseController {
                     return jsAlert("上传失败", "/admin/home", rep);
                 } else {
                     File zipfile = new File("FILES/" + name + "/" + "sample.zip");
-                    req.setCharacterEncoding("UTF-8");
-                    Part part = req.getPart("zipfile");
+                    try {
+                        req.setCharacterEncoding("UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                        return jsAlert("编码错误", rep);
+                    }
+                    Part part = null;
+                    try {
+                        part = req.getPart("zipfile");
+                    } catch (IOException | ServletException e) {
+                        e.printStackTrace();
+                        return jsAlert("上传失败", "/admin/home", rep);
+                    }
                     if (part == null || part.getSubmittedFileName() == null || part.getSubmittedFileName().isEmpty()) {
                         return jsAlert("上传失败", "/admin/home", rep);
                     }
-                    part.write(zipfile.getAbsolutePath());
-
+                    try {
+                        part.write(zipfile.getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return jsAlert("写入失败", rep);
+                    }
                     return jsAlert("上传成功:" + zipfile.getName(), "/admin/home", rep);
 
                 }
@@ -196,7 +226,7 @@ public class AdminController extends BaseController {
             if (!file.exists()) {
                 return jsAlert("打包失败", "/admin/home", rep);
             } else {
-                Utils.unzipAllZipsInDirectory("FILES/" + name + "/" + "subCode");
+                Utils.unzipAllZipsInDirectory(new File("FILES/" + name + "/" + "subCode"));
 //                Utils.DeleteAllZipsInDirectory("FILES/" + name + "/" + "subCode");
 
                 File zipfile = new File("FILES/" + name + "/subCode_" + name + ".zip");
@@ -204,20 +234,21 @@ public class AdminController extends BaseController {
                     // 创建 ZIP 输出流
                     FileOutputStream fos = new FileOutputStream(zipfile);
                     ZipOutputStream zos = new ZipOutputStream(fos);
-
-                    // 调用递归方法将文件夹内容添加到 ZIP 输出流
+//
+//                    // 调用递归方法将文件夹内容添加到 ZIP 输出流
                     Utils.zipFolder(file, zos);
-
-                    // 关闭流
+//
+//                    // 关闭流
                     zos.close();
                     fos.close();
+//
+//                    FileInputStream input = new FileInputStream("FILES/" + name + "/subCode_" + name + ".zip");
+//                    ServletOutputStream output = rep.getOutputStream();
+//                    IOUtils.copy(input, output);
+//                    input.close();
+//                    output.close();
 
-                    FileInputStream input = new FileInputStream("FILES/" + name + "/subCode_" + name + ".zip");
-                    ServletOutputStream output = rep.getOutputStream();
-                    IOUtils.copy(input, output);
-                    input.close();
-                    output.close();
-
+//
                     return jsAlert("打包成功:" + zipfile.getName(), "/admin/home", rep);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -225,7 +256,27 @@ public class AdminController extends BaseController {
                 }
             }
         }
-//        return null;
+//        return "/admin/home";
+    }
+
+    @RequestMapping("/download")
+    public String download(String name, HttpServletRequest req, HttpServletResponse rep) {
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream("FILES/" + name + "/subCode_" + name + ".zip");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        ServletOutputStream output = null;
+        try {
+            output = rep.getOutputStream();
+            IOUtils.copy(input, output);
+            input.close();
+            output.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
 

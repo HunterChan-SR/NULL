@@ -102,6 +102,11 @@
                 <td>
                     <a class="btn btn-warning"
                        href="/admin/package?name=${(bean.name)!}">一键打包学生代码（请勿重复点击！）</a>
+
+                    <#if bean.packaged==true >
+                        <a href="/admin/download?name=${(bean.name)!}">下载学生代码</a>
+                    </#if>
+
                 </td>
             </tr>
         </#list>

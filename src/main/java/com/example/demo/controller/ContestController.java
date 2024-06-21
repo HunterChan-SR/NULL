@@ -55,46 +55,107 @@ public class ContestController extends BaseController {
     }
 
     @RequestMapping("/download")
-    public String download(String name, HttpServletRequest req, HttpServletResponse rep) throws IOException {
+    public String download(String name, HttpServletRequest req, HttpServletResponse rep) {
         File file = new File(name);
         if (!file.exists()) {
-            rep.sendError(404, "文件不存在，请及时练习监考老师！\n 祝您比赛顺利");
+            try {
+                rep.sendError(404, "文件不存在，请及时练习监考老师！\n 祝您比赛顺利");
+            } catch (IOException e) {
+                e.printStackTrace();
+                jsAlert("找不到文件", rep);
+            }
             return null;
         }
-        FileInputStream input = new FileInputStream(name);
-        ServletOutputStream output = rep.getOutputStream();
-        IOUtils.copy(input, output);
-        input.close();
-        output.close();
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(name);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            jsAlert("内部错误", rep);
+        }
+        ServletOutputStream output = null;
+        try {
+            output = rep.getOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+            jsAlert("输出文件失败", rep);
+        }
+        try {
+            IOUtils.copy(input, output);
+        } catch (IOException e) {
+            e.printStackTrace();
+            jsAlert("服务器异常", rep);
+        }
+        try {
+            input.close();
+            output.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
     @RequestMapping("/sample")
-    public String sample(String name, HttpServletRequest req, HttpServletResponse rep) throws IOException {
+    public String sample(String name, HttpServletRequest req, HttpServletResponse rep) {
 
         File file = new File(name);
         if (!file.exists()) {
-            rep.sendError(404, "文件不存在，请及时练习监考老师！\n 祝您比赛顺利");
+            try {
+                rep.sendError(404, "文件不存在，请及时练习监考老师！\n 祝您比赛顺利");
+            } catch (IOException e) {
+                e.printStackTrace();
+                jsAlert("找不到文件", rep);
+            }
             return null;
         }
 //        System.out.println(name);
-        FileInputStream input = new FileInputStream(name);
-        ServletOutputStream output = rep.getOutputStream();
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(name);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        ServletOutputStream output = null;
+        try {
+            output = rep.getOutputStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 //        int b;
 //        while ((b = input.read()) != -1) {
 //            output.write(b);
 //        }
-        IOUtils.copy(input, output);
-        input.close();
-        output.close();
+        try {
+            IOUtils.copy(input, output);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            input.close();
+            output.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return null;
     }
 
     @RequestMapping("/upload")
-    public String upload(HttpServletRequest req, HttpServletResponse rep) throws IOException, ServletException {
-        req.setCharacterEncoding("UTF-8");
+    public String upload(HttpServletRequest req, HttpServletResponse rep) {
+        try {
+            req.setCharacterEncoding("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         String upath = req.getParameter("upath"); // 假设 upath 是一个合法的目录路径
-        Part part = req.getPart("ufile");
+        Part part = null;
+        try {
+            part = req.getPart("ufile");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
+        }
         if (part == null || part.getSubmittedFileName() == null || part.getSubmittedFileName().isEmpty()) {
             return jsAlert("未选择文件，提交失败", rep);
         }
@@ -109,7 +170,11 @@ public class ContestController extends BaseController {
 
         // 将文件写入到指定目录下，注意这里是目录的路径加上文件名
         String filePath = directory.getAbsolutePath() + File.separator + fileName; // 使用File.separator确保跨平台兼容性
-        part.write(filePath);
+        try {
+            part.write(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return jsAlert("提交成功", rep);
     }
