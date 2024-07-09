@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Download & Upload</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="../../../js/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="../../../js/bootstrap.min.js"></script>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .column {
+            width: 45%;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            min-height: 70vh;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="column">
+    <form method="post" enctype="multipart/form-data" action="upload">
+        <h2>上传html</h2>
+        <input type="hidden" name="uppath" value=${(uppath)!}>
+
+        <input class="btn-info" type="file" id="fileInput" name="upfile" accept=".html">
+        <!-- 添加清除文件按钮 -->
+        <a id="clearFileButton">清除文件</a>
+        <br><br>
+        <button class="btn btn-large btn-warning" type="submit">提交</button>
+    </form>
+    <br><br>
+
+</div>
+
+<div class="column">
+
+    <h2>
+        文件列表：
+    </h2>
+    <br><br><br>
+
+    <table class="table table-condensed table-striped">
+        <#list retList as bean>
+        <tr>
+            <td>
+                <h3>
+                    <a href="/tool/download?filename=${(bean)!}">
+                        ${(bean)!}
+                    </a>
+                </h3>
+            </td>
+        </tr>
+    </#list>
+    </table>
+
+
+</div>
+</div>
+</body>
+
+<script>    // 当文档加载完成后执行
+document.addEventListener('DOMContentLoaded', function () {
+    // 获取清除文件按钮和文件输入框的引用
+    var clearFileButton = document.getElementById('clearFileButton');
+    var fileInput = document.getElementById('fileInput');
+
+    // 为清除文件按钮添加点击事件监听器
+    clearFileButton.addEventListener('click', function () {
+        // 重置文件输入框的值，从而清除已选择的文件
+        fileInput.value = '';
+    });
+});
+</script>
+</html>
+
+<!--姓名（考号）：<input type="text" name="uname"> <br>-->

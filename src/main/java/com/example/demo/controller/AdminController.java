@@ -77,6 +77,9 @@ public class AdminController extends BaseController {
             // 确保这个方法返回的就是你的subDirectories列表
             List<Contest> retList = new ArrayList<>();
             for (var s : subDirectories) {
+                if (s.equals("other")) {
+                    continue;
+                }
                 Contest bean = new Contest();
                 bean.setName(s);
                 File packageFile = new File("FILES/" + s + "/subCode_" + s + ".zip");
